@@ -1,5 +1,10 @@
 #include "systemcalls.h"
 
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <fcntl.h>
+
 /**
  * @param cmd the command to execute with system()
  * @return true if the command in @param cmd was executed
@@ -7,7 +12,8 @@
  *   either in invocation of the system() call, or if a non-zero return
  *   value was returned by the command issued in @param cmd.
 */
-bool do_system(const char *cmd)
+bool
+do_system (const char *cmd)
 {
 
 /*
@@ -17,7 +23,7 @@ bool do_system(const char *cmd)
  *   or false() if it returned a failure
 */
 
-    return true;
+  return system (cmd) != -1;
 }
 
 /**
@@ -34,20 +40,23 @@ bool do_system(const char *cmd)
 *   by the command issued in @param arguments with the specified arguments.
 */
 
-bool do_exec(int count, ...)
+bool
+do_exec (int count, ...)
 {
-    va_list args;
-    va_start(args, count);
-    char * command[count+1];
-    int i;
-    for(i=0; i<count; i++)
+  va_list args;
+  va_start (args, count);
+  char *command[count + 1];
+  int i, status;
+  pid_t pid;
+
+  for (i = 0; i < count; i++)
     {
-        command[i] = va_arg(args, char *);
+      command[i] = va_arg (args, char *);
     }
-    command[count] = NULL;
-    // this line is to avoid a compile warning before your implementation is complete
-    // and may be removed
-    command[count] = command[count];
+  command[count] = NULL;
+  // this line is to avoid a compile warning before your implementation is complete
+  // and may be removed
+//    command[count] = command[count];
 
 /*
  * TODO:
@@ -59,9 +68,32 @@ bool do_exec(int count, ...)
  *
 */
 
-    va_end(args);
+  va_end (args);
 
-    return true;
+  pid = fork ();
+
+  switch (pid)
+    {
+    case -1:
+      return false;		// parent process: fork fails
+    case 0:
+      // child process
+      execv (command[0], command);
+      exit (-1);		// child: exec failed, exit child process with error
+    default:
+      // parent process: wating for child
+      if (waitpid (pid, &status, 0) == pid)
+	{
+	  // parent process: child exited normally?
+	  if (WIFEXITED (status))
+	    // parent process: was child exit status ok?
+	    return WEXITSTATUS (status) == 0;
+	  else
+	    return false;
+	}
+    }
+  
+  return false;
 }
 
 /**
@@ -69,20 +101,22 @@ bool do_exec(int count, ...)
 *   This file will be closed at completion of the function call.
 * All other parameters, see do_exec above
 */
-bool do_exec_redirect(const char *outputfile, int count, ...)
+bool
+do_exec_redirect (const char *outputfile, int count, ...)
 {
-    va_list args;
-    va_start(args, count);
-    char * command[count+1];
-    int i;
-    for(i=0; i<count; i++)
+  va_list args;
+  va_start (args, count);
+  char *command[count + 1];
+  int i, status, fd;
+  pid_t pid;
+  for (i = 0; i < count; i++)
     {
-        command[i] = va_arg(args, char *);
+      command[i] = va_arg (args, char *);
     }
-    command[count] = NULL;
-    // this line is to avoid a compile warning before your implementation is complete
-    // and may be removed
-    command[count] = command[count];
+  command[count] = NULL;
+  // this line is to avoid a compile warning before your implementation is complete
+  // and may be removed
+  // command[count] = command[count];
 
 
 /*
@@ -93,7 +127,38 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *
 */
 
-    va_end(args);
+  va_end (args);
 
-    return true;
+
+  fd = open (outputfile, O_WRONLY | O_TRUNC | O_CREAT, 0644);
+  if (fd < 0)
+    {
+      return false;
+    }
+
+  pid = fork ();
+  switch (pid)
+    {
+    case -1:
+      return false;
+    case 0:
+      if (dup2 (fd, 1) < 0)
+	return false;
+      close (fd);
+      execv (command[0], command);
+      exit (-1);		// if execv fails
+    default:
+      // parent process: wating for child
+      if (waitpid (pid, &status, 0) == pid)
+	{
+	  // parent process: child exited normally?
+	  if (WIFEXITED (status))
+	    // parent process: was child exit status ok?
+	    return WEXITSTATUS (status) == 0;
+	  else
+	    return false;
+	}
+    }
+
+  return false;
 }
