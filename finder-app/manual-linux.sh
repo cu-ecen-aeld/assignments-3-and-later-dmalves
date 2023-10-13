@@ -7,9 +7,9 @@ set -u
 
 OUTDIR=/tmp/aeld
 KERNEL_REPO=git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
-#KERNEL_VERSION=v5.1.10
+KERNEL_VERSION=v5.1.10
 # changed kernel version to avoid compiler version error
-KERNEL_VERSION=v5.10.188
+#KERNEL_VERSION=v5.10.188
 BUSYBOX_VERSION=1_33_1
 FINDER_APP_DIR=$(realpath $(dirname $0))
 ARCH=arm64
