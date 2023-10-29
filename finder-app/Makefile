@@ -7,6 +7,8 @@ ifdef CROSS_COMPILE
 CC=$(CROSS_COMPILE)gcc
 endif
 
+all: writer
+
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
