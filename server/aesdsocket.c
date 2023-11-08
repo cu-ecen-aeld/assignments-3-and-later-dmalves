@@ -51,15 +51,18 @@ main (int argc, char **argv)
   struct sigaction sa;
   bool dflag = false;
   char c;
+  pid_t pid;
+  char *PIDFILE;
 
   openlog (NULL, 0, LOG_USER);
 
-
-  while ((c = getopt (argc, argv, "d")) != -1)
+  // aesdsocket -d $PIDFILE
+  while ((c = getopt (argc, argv, "d:")) != -1)
     switch (c)
       {
       case 'd':
 	dflag = true;
+	PIDFILE = optarg;
 	break;
 
       default:
@@ -147,6 +150,10 @@ main (int argc, char **argv)
 	}
       else
 	{
+	  pid = getpid();
+	  FILE *pidfile = fopen(PIDFILE,"w");
+	  fprintf(pidfile,"%d", pid);
+	  fclose(pidfile);
 	  syslog (LOG_INFO, "server: I am a daemon ...\n");
 	}
     }
