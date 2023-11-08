@@ -53,7 +53,7 @@ main (int argc, char **argv)
   char c;
   pid_t pid;
   bool dflag = false; // daemon flag
-  openlog (NULL, LOG_CONS | LOG_NDELAY, LOG_DAEMON);
+  openlog ("aesdsocket", LOG_PID, LOG_AUTHPRIV);
 
   // aesdsocket -d $PIDFILE
   while ((c = getopt (argc, argv, "d")) != -1)
