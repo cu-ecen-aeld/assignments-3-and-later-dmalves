@@ -18,6 +18,7 @@
 
 #define PORT "9000"
 #define TMP_FILE "/var/tmp/aesdsocketdata"
+#define PIDFILE "/var/tmp/aesdsocketdata.pid"
 
 #define BACKLOG 10
 #define MEMSIZE 1024*1024
@@ -28,7 +29,6 @@ void signal_handler (int s);
 
 size_t read_line (int client_sock, char *buffer, size_t buffer_size);
 
-
 // Global variables: must be closed or freed on signal handler
 
 int loop_sock, client_sock;
@@ -36,6 +36,7 @@ FILE *output_file;
 char *buffer;
 struct addrinfo *servinfo;
 int fd;
+
 
 int
 main (int argc, char **argv)
@@ -49,20 +50,17 @@ main (int argc, char **argv)
   char ip[INET6_ADDRSTRLEN];	// ip address
   int rv;			// error value
   struct sigaction sa;
-  bool dflag = false;
   char c;
   pid_t pid;
-  char *PIDFILE;
-
-  openlog (NULL, 0, LOG_USER);
+  bool dflag = false; // daemon flag
+  openlog (NULL, 0, LOG_DAEMON);
 
   // aesdsocket -d $PIDFILE
-  while ((c = getopt (argc, argv, "d:")) != -1)
+  while ((c = getopt (argc, argv, "d")) != -1)
     switch (c)
       {
       case 'd':
 	dflag = true;
-	PIDFILE = optarg;
 	break;
 
       default:
@@ -78,7 +76,7 @@ main (int argc, char **argv)
   // get server address info
   if ((rv = getaddrinfo (NULL, PORT, &hints, &servinfo)) != 0)
     {
-      syslog (LOG_INFO, "getaddrinfo: %s\n", gai_strerror (rv));
+      syslog (LOG_ERR, "getaddrinfo: %s\n", gai_strerror (rv));
       return -1;
     }
 
@@ -229,7 +227,6 @@ main (int argc, char **argv)
 
   return 0;
 }
-
 
 void
 signal_handler (int s)
