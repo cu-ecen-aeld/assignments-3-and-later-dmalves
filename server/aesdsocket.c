@@ -145,6 +145,7 @@ main (int argc, char **argv)
       if (daemon (0, 0) == -1)
 	{
 	  syslog (LOG_ERR, "can't become daemon: %s\n", strerror (errno));
+	  exit(1);
 	}
       else
 	{
