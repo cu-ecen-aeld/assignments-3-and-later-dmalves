@@ -13,7 +13,7 @@
 #include <syslog.h>
 #include <stdbool.h>
 #include <fcntl.h>
-
+#include "become_daemon.h"
 
 
 #define PORT "9000"
@@ -29,10 +29,12 @@ void signal_handler (int s);
 
 size_t read_line (int client_sock, char *buffer, size_t buffer_size);
 
+
 // Global variables: must be closed or freed on signal handler
 
 int loop_sock, client_sock;
 FILE *output_file;
+FILE *pid_file;
 char *buffer;
 struct addrinfo *servinfo;
 int fd;
@@ -52,8 +54,8 @@ main (int argc, char **argv)
   struct sigaction sa;
   char c;
   pid_t pid;
-  bool dflag = false; // daemon flag
-  openlog ("aesdsocket", LOG_PID, LOG_AUTHPRIV);
+  bool dflag = false;		// daemon flag
+  openlog ("aesdsocket", LOG_PID, LOG_USER);
 
   // aesdsocket -d $PIDFILE
   while ((c = getopt (argc, argv, "d")) != -1)
@@ -139,23 +141,20 @@ main (int argc, char **argv)
 
   syslog (LOG_INFO, "server: waiting for connections...\n");
 
-  if (dflag)
+  if (dflag && (becomeDaemon() == -1))
     {
-      // became daemon
-      if (daemon (0, 0) == -1)
-	{
-	  syslog (LOG_ERR, "can't become daemon: %s\n", strerror (errno));
-	  exit(1);
-	}
-      else
-	{
-	  pid = getpid();
-	  FILE *pidfile = fopen(PIDFILE,"w");
-	  fprintf(pidfile,"%d", pid);
-	  fclose(pidfile);
-	  syslog (LOG_INFO, "server: I am a daemon ...\n");
-	}
+		perror("Can't become daemon!");
     }
+  // save process ID to file
+  pid_file = fopen(PIDFILE,"w");
+  if (pid_file == NULL){
+	  syslog(LOG_ERR, "can't open %s: %s", PIDFILE, strerror(errno));
+	  exit(EXIT_FAILURE);
+  }
+  fprintf(pid_file, "%d", getpid());
+  fclose(pid_file);
+
+
   while (true)
     {
       sin_size = sizeof client_addr;
@@ -303,3 +302,4 @@ get_in_addr (struct sockaddr *sa)
 
   return &(((struct sockaddr_in6 *) sa)->sin6_addr);
 }
+

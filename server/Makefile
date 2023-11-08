@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-I.
 DEPS = 
-OBJ = aesdsocket.o 
+OBJ = aesdsocket.o  become_daemon.o
 
 default: aesdsocket
 all: aesdsocket
