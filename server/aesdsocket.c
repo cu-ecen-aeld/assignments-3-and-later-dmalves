@@ -20,7 +20,7 @@
 #define TMP_FILE "/var/tmp/aesdsocketdata"
 
 #define BACKLOG 10
-#define MEMSIZE 5*1024
+#define MEMSIZE 1024*1024
 
 void *get_in_addr (struct sockaddr *sa);
 
