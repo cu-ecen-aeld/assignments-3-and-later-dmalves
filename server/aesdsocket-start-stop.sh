@@ -4,7 +4,7 @@ DAEMON="aesdsocket"
 
 start() {
     printf 'Starting %s: ' "$DAEMON"
-    start-stop-daemon -S -n aesdsocket -a /usr/bin/aesdsocket -- -d
+    start-stop-daemon -S -b -n aesdsocket -a /usr/bin/aesdsocket -- -d
     status=$?
     if [ "$status" -eq 0 ]; then
             echo "OK"
