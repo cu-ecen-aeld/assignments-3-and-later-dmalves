@@ -15,4 +15,4 @@ aesdsocket: $(OBJ)
 .PHONY: clean
 
 clean:
-	rm -f *.o aesdsocket 
+	rm -f *.o aesdsocket *.c~

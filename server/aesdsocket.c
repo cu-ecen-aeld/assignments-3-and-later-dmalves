@@ -77,47 +77,38 @@ main (int argc, char **argv)
   if ((rv = getaddrinfo (NULL, PORT, &hints, &servinfo)) != 0)
     {
       perror ("getaddrinfo");
-      return -1;
+      exit(-1);
     }
 
-  // loop through all the results and bind to the first we can
-  for (p = servinfo; p != NULL; p = p->ai_next)
+
+  if ((loop_sock = socket (servinfo->ai_family, servinfo->ai_socktype,
+			   servinfo->ai_protocol)) == -1)
     {
-      if ((loop_sock = socket (p->ai_family, p->ai_socktype,
-			       p->ai_protocol)) == -1)
-	{
-	  perror("server: socket\n");
-	  continue;
-	}
-
-      if (setsockopt (loop_sock, SOL_SOCKET, SO_REUSEADDR, &yes,
-		      sizeof (int)) == -1)
-	{
-	  perror("setsockopt\n");
-	  exit (-1);
-	}
-
-      if (bind (loop_sock, p->ai_addr, p->ai_addrlen) == -1)
-	{
-	  close (loop_sock);
-	  perror("server: bind");
-	  continue;
-	}
-
-      break;
+      perror ("server: socket\n");
+      exit(-1);
     }
 
-  freeaddrinfo (servinfo);
-
-  if (p == NULL)
+  if (setsockopt (loop_sock, SOL_SOCKET, SO_REUSEADDR, &yes,
+		  sizeof (int)) == -1)
     {
-      fprintf(stderr,"server: failed to bind");
+      perror ("setsockopt\n");
       exit (-1);
     }
 
+  if (bind (loop_sock, servinfo->ai_addr, servinfo->ai_addrlen) == -1)
+    {
+      close (loop_sock);
+      perror ("server: bind");
+      exit(-1);
+    }
+
+
+  freeaddrinfo (servinfo);
+
+ 
   if (listen (loop_sock, BACKLOG) == -1)
     {
-      perror("Server can't listen\n");
+      perror ("Server can't listen\n");
       exit (-1);
     }
 
@@ -139,11 +130,11 @@ main (int argc, char **argv)
 
   syslog (LOG_INFO, "server: waiting for connections...\n");
 
-  if (dflag && (becomeDaemon() == -1))
+  if (dflag && (becomeDaemon () == -1))
     {
-		perror("Can't become daemon!");
+      perror ("Can't become daemon!");
     }
-  
+
 
   while (true)
     {
@@ -292,4 +283,3 @@ get_in_addr (struct sockaddr *sa)
 
   return &(((struct sockaddr_in6 *) sa)->sin6_addr);
 }
-
