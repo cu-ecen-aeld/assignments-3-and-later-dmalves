@@ -1,12 +1,10 @@
 #!/bin/sh
 
 DAEMON="aesdsocket"
-PIDFILE="/var/tmp/aesdsocketdata.pid"
 
 start() {
     printf 'Starting %s: ' "$DAEMON"
-    start-stop-daemon -b -S -q  -x "/usr/bin/$DAEMON" \
-            -- -d 
+    start-stop-daemon -S -n aesdsocket -a /usr/bin/aesdsocket -- -d
     status=$?
     if [ "$status" -eq 0 ]; then
             echo "OK"
@@ -18,7 +16,7 @@ start() {
 
 stop() {
     printf 'Stopping %s: ' "$DAEMON"
-    start-stop-daemon -K -s TERM -q -p "$PIDFILE"
+    start-stop-daemon -K -n aesdsocket
     status=$?
     if [ "$status" -eq 0 ]; then
             rm -f "$PIDFILE"

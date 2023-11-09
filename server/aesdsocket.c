@@ -18,7 +18,6 @@
 
 #define PORT "9000"
 #define TMP_FILE "/var/tmp/aesdsocketdata"
-#define PIDFILE "/var/tmp/aesdsocketdata.pid"
 
 #define BACKLOG 10
 #define MEMSIZE 1024*1024
@@ -34,7 +33,6 @@ size_t read_line (int client_sock, char *buffer, size_t buffer_size);
 
 int loop_sock, client_sock;
 FILE *output_file;
-FILE *pid_file;
 char *buffer;
 struct addrinfo *servinfo;
 int fd;
@@ -145,15 +143,7 @@ main (int argc, char **argv)
     {
 		perror("Can't become daemon!");
     }
-  // save process ID to file
-  pid_file = fopen(PIDFILE,"w");
-  if (pid_file == NULL){
-	  syslog(LOG_ERR, "can't open %s: %s", PIDFILE, strerror(errno));
-	  exit(EXIT_FAILURE);
-  }
-  fprintf(pid_file, "%d", getpid());
-  fclose(pid_file);
-
+  
 
   while (true)
     {
