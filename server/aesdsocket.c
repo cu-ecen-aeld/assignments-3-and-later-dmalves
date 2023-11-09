@@ -49,23 +49,23 @@ main (int argc, char **argv)
   int yes = 1;
   char ip[INET6_ADDRSTRLEN];	// ip address
   int rv;			// error value
-  struct sigaction sa;
-  char c;
-  bool dflag = false;		// daemon flag
+  //struct sigaction sa;
+  //char c;
+  //bool dflag = false;		// daemon flag
   
   openlog (NULL, 0, LOG_USER);
 
   // aesdsocket -d 
-  while ((c = getopt (argc, argv, "d")) != -1)
-    switch (c)
-      {
-      case 'd':
-	dflag = true;
-	break;
+  //while ((c = getopt (argc, argv, "d")) != -1)
+    //switch (c)
+      //{
+      //case 'd':
+	//dflag = true;
+	//break;
 
-      default:
-	dflag = false;
-      }
+      //default:
+	//dflag = false;
+      //}
 
 
   memset (&hints, 0, sizeof hints);
@@ -105,11 +105,11 @@ main (int argc, char **argv)
 
   freeaddrinfo (servinfo);
 
-  if (dflag && (becomeDaemon () == -1))
-    {
-      perror ("Can't become daemon!");
-      exit(-1);
-    }
+  //if (dflag && (becomeDaemon () == -1))
+    //{
+      //perror ("Can't become daemon!");
+      //exit(-1);
+    //}
     
   if (listen (loop_sock, BACKLOG) == -1)
     {
@@ -119,19 +119,19 @@ main (int argc, char **argv)
 
   // register signal handler
 
-  sa.sa_handler = signal_handler;
-  sigemptyset (&sa.sa_mask);
-  sa.sa_flags = SA_RESTART;
-  if (sigaction (SIGINT, &sa, NULL) == -1)
-    {
-      perror ("sigaction");
-      exit (1);
-    }
-  if (sigaction (SIGTERM, &sa, NULL) == -1)
-    {
-      perror ("sigaction");
-      exit (1);
-    }
+  //sa.sa_handler = signal_handler;
+  //sigemptyset (&sa.sa_mask);
+  //sa.sa_flags = SA_RESTART;
+  //if (sigaction (SIGINT, &sa, NULL) == -1)
+    //{
+      //perror ("sigaction");
+      //exit (1);
+    //}
+  //if (sigaction (SIGTERM, &sa, NULL) == -1)
+    //{
+      //perror ("sigaction");
+      //exit (1);
+    //}
 
   syslog (LOG_INFO, "server: waiting for connections...\n");
 

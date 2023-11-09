@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-I. -Wall -Werror -g
+CFLAGS=-I. -Wall -Werror -g -O0
 DEPS = 
 OBJ = aesdsocket.o  become_daemon.o
 
