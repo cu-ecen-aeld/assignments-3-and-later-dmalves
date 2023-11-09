@@ -50,27 +50,21 @@ main (int argc, char **argv)
   char ip[INET6_ADDRSTRLEN];	// ip address
   int rv;			// error value
   struct sigaction sa;
-  char c;
   bool dflag = false;		// daemon flag
   
   openlog (NULL, 0, LOG_USER);
   
-  syslog(LOG_DEBUG, "processing getopt");
+  syslog(LOG_DEBUG, "processing argv");
 
   // aesdsocket -d 
-  while ((c = getopt (argc, argv, "d")) != -1) {
-    switch (c)
-      {
-      case 'd':
+  if (argc > 1 && strcmp(argv[1], "-d") == 0) {
 	dflag = true;
 	syslog(LOG_DEBUG, "dflag is true");
-	break;
-
-      default:
-      syslog(LOG_DEBUG, "wrong args ... exiting");
-	 exit(EXIT_FAILURE);;
-      }
+  } else {
+	  dflag = false;
+	 syslog(LOG_DEBUG, "dflag is false");
   }
+ 
 
 
   memset (&hints, 0, sizeof hints);
