@@ -50,22 +50,22 @@ main (int argc, char **argv)
   char ip[INET6_ADDRSTRLEN];	// ip address
   int rv;			// error value
   //struct sigaction sa;
-  //char c;
-  //bool dflag = false;		// daemon flag
+  char c;
+  bool dflag = false;		// daemon flag
   
   openlog (NULL, 0, LOG_USER);
 
   // aesdsocket -d 
-  //while ((c = getopt (argc, argv, "d")) != -1)
-    //switch (c)
-      //{
-      //case 'd':
-	//dflag = true;
-	//break;
+  while ((c = getopt (argc, argv, "d")) != -1)
+    switch (c)
+      {
+      case 'd':
+	dflag = true;
+	break;
 
-      //default:
-	//dflag = false;
-      //}
+      default:
+	dflag = false;
+      }
 
 
   memset (&hints, 0, sizeof hints);
@@ -105,11 +105,11 @@ main (int argc, char **argv)
 
   freeaddrinfo (servinfo);
 
-  //if (dflag && (becomeDaemon () == -1))
-    //{
-      //perror ("Can't become daemon!");
-      //exit(-1);
-    //}
+  if (dflag && (becomeDaemon () == -1))
+    {
+      perror ("Can't become daemon!");
+      exit(-1);
+    }
     
   if (listen (loop_sock, BACKLOG) == -1)
     {
