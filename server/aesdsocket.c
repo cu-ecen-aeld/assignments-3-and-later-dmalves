@@ -20,7 +20,7 @@
 #define TMP_FILE "/var/tmp/aesdsocketdata"
 
 #define BACKLOG 10
-#define MEMSIZE 1024*1024
+#define MEMSIZE 5*1024
 
 void *get_in_addr (struct sockaddr *sa);
 
@@ -43,7 +43,7 @@ main (int argc, char **argv)
 {
 
 
-  struct addrinfo hints, *p;
+  struct addrinfo hints;
   struct sockaddr_storage client_addr;
   socklen_t sin_size;
   int yes = 1;
@@ -51,11 +51,11 @@ main (int argc, char **argv)
   int rv;			// error value
   struct sigaction sa;
   char c;
-  pid_t pid;
   bool dflag = false;		// daemon flag
-  //openlog ("aesdsocket", LOG_PID, LOG_USER);
+  
+  openlog (NULL, 0, LOG_USER);
 
-  // aesdsocket -d $PIDFILE
+  // aesdsocket -d 
   while ((c = getopt (argc, argv, "d")) != -1)
     switch (c)
       {
@@ -163,9 +163,6 @@ main (int argc, char **argv)
       buffer = (char *) malloc (MEMSIZE * sizeof (char));
       if (buffer != NULL)
 	{
-	  //while((rv = read_line(client_sock, buffer, 1024)) > 0){
-	  //fprintf(output_file,"%s",buffer);
-	  //}
 	  rv = read_line (client_sock, buffer, MEMSIZE);
 	  fprintf (output_file, "%s", buffer);
 	  if (rv < 0)
@@ -176,6 +173,7 @@ main (int argc, char **argv)
       else
 	{
 	  syslog (LOG_ERR, "Error on malloc\n");
+	  exit(-1);
 	}
       // close output file
       fclose (output_file);
@@ -183,7 +181,6 @@ main (int argc, char **argv)
 
       // send back file content
       fd = open (TMP_FILE, O_RDONLY);
-      int total = 0;
       if (fd < 0)
 	{
 	  perror ("cant open file back");

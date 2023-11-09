@@ -8,7 +8,7 @@
 int				/* Returns 0 on success, -1 on error */
 becomeDaemon ()
 {
-  int maxfd, fd;
+  int fd;
 
   switch (fork ())
     {
@@ -63,7 +63,9 @@ becomeDaemon ()
       return -1;
     }
 
-  close (fd);
+  if (fd > 2) {
+	  close(fd);
+  }
   return 0;
 
 }
