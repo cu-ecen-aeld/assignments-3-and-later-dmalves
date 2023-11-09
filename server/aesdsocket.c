@@ -78,7 +78,7 @@ main (int argc, char **argv)
   // get server address info
   if ((rv = getaddrinfo (NULL, PORT, &hints, &servinfo)) != 0)
     {
-      syslog (LOG_ERR, "getaddrinfo: %s\n", gai_strerror (rv));
+      perror ("getaddrinfo");
       return -1;
     }
 
@@ -88,21 +88,21 @@ main (int argc, char **argv)
       if ((loop_sock = socket (p->ai_family, p->ai_socktype,
 			       p->ai_protocol)) == -1)
 	{
-	  syslog (LOG_ERR, "server: socket\n");
+	  perror("server: socket\n");
 	  continue;
 	}
 
       if (setsockopt (loop_sock, SOL_SOCKET, SO_REUSEADDR, &yes,
 		      sizeof (int)) == -1)
 	{
-	  syslog (LOG_ERR, "setsockopt\n");
+	  perror("setsockopt\n");
 	  exit (-1);
 	}
 
       if (bind (loop_sock, p->ai_addr, p->ai_addrlen) == -1)
 	{
 	  close (loop_sock);
-	  syslog (LOG_ERR, "server: bind");
+	  perror("server: bind");
 	  continue;
 	}
 
@@ -113,13 +113,13 @@ main (int argc, char **argv)
 
   if (p == NULL)
     {
-      syslog (LOG_ERR, "server: failed to bind\n");
+      fprintf(stderr,"server: failed to bind");
       exit (-1);
     }
 
   if (listen (loop_sock, BACKLOG) == -1)
     {
-      syslog (LOG_ERR, "Server can't listen\n");
+      perror("Server can't listen\n");
       exit (-1);
     }
 
