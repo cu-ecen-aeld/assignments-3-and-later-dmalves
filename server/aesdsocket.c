@@ -105,7 +105,12 @@ main (int argc, char **argv)
 
   freeaddrinfo (servinfo);
 
- 
+  if (dflag && (becomeDaemon () == -1))
+    {
+      perror ("Can't become daemon!");
+      exit(-1);
+    }
+    
   if (listen (loop_sock, BACKLOG) == -1)
     {
       perror ("Server can't listen\n");
@@ -130,12 +135,7 @@ main (int argc, char **argv)
 
   syslog (LOG_INFO, "server: waiting for connections...\n");
 
-  if (dflag && (becomeDaemon () == -1))
-    {
-      perror ("Can't become daemon!");
-    }
-
-
+  
   while (true)
     {
       sin_size = sizeof client_addr;
