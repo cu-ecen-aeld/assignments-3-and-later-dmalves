@@ -107,7 +107,9 @@ main (int argc, char **argv)
  
  if(dflag)
     { 
-	  int result = becomeDaemon ();
+	  // int result = becomeDaemon ();
+	  int result = 0;
+	  syslog (LOG_INFO, "server: daemon monde\n");
 	  if (result == -1)
 	  {
         perror ("Can't become daemon!");
