@@ -55,19 +55,22 @@ main (int argc, char **argv)
   
   openlog (NULL, 0, LOG_USER);
   
-  syslog(LOG_DEBUG, "About to process getopt");
+  syslog(LOG_DEBUG, "processing getopt");
 
   // aesdsocket -d 
-  while ((c = getopt (argc, argv, "d")) != -1)
+  while ((c = getopt (argc, argv, "d")) != -1) {
     switch (c)
       {
       case 'd':
 	dflag = true;
+	syslog(LOG_DEBUG, "dflag is true");
 	break;
 
       default:
-	dflag = false;
+      syslog(LOG_DEBUG, "wrong args ... exiting");
+	 exit(EXIT_FAILURE);;
       }
+  }
 
 
   memset (&hints, 0, sizeof hints);
