@@ -69,7 +69,7 @@ main (int argc, char **argv)
 
 
   memset (&hints, 0, sizeof hints);
-  hints.ai_family = AF_UNSPEC;	// ipv4 or ipv6
+  hints.ai_family = AF_INET;;	// ipv4 only
   hints.ai_socktype = SOCK_STREAM;	// stream socket
   hints.ai_flags = AI_PASSIVE;	// my ip
 
