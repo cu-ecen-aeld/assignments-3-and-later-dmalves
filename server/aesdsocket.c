@@ -49,11 +49,13 @@ main (int argc, char **argv)
   int yes = 1;
   char ip[INET6_ADDRSTRLEN];	// ip address
   int rv;			// error value
-  //struct sigaction sa;
+  struct sigaction sa;
   char c;
   bool dflag = false;		// daemon flag
   
   openlog (NULL, 0, LOG_USER);
+  
+  syslog(LOG_DEBUG, "About to process getopt");
 
   // aesdsocket -d 
   while ((c = getopt (argc, argv, "d")) != -1)
@@ -73,6 +75,7 @@ main (int argc, char **argv)
   hints.ai_socktype = SOCK_STREAM;	// stream socket
   hints.ai_flags = AI_PASSIVE;	// my ip
 
+   syslog(LOG_DEBUG, "processing getaddrinfo()");
   // get server address info
   if ((rv = getaddrinfo (NULL, PORT, &hints, &servinfo)) != 0)
     {
@@ -80,21 +83,22 @@ main (int argc, char **argv)
       exit(-1);
     }
 
-
+  syslog(LOG_DEBUG, "processing socket()");
   if ((loop_sock = socket (servinfo->ai_family, servinfo->ai_socktype,
 			   servinfo->ai_protocol)) == -1)
     {
       perror ("server: socket\n");
       exit(-1);
     }
-
+  syslog(LOG_DEBUG, "processing setsockopt()");
   if (setsockopt (loop_sock, SOL_SOCKET, SO_REUSEADDR, &yes,
 		  sizeof (int)) == -1)
     {
       perror ("setsockopt\n");
       exit (-1);
     }
-
+    
+  syslog(LOG_DEBUG, "processing bind()");
   if (bind (loop_sock, servinfo->ai_addr, servinfo->ai_addrlen) == -1)
     {
       close (loop_sock);
@@ -102,13 +106,14 @@ main (int argc, char **argv)
       exit(-1);
     }
 
-
+  syslog(LOG_DEBUG, "processing freeaddrinfo()");
   freeaddrinfo (servinfo);
  
  if(dflag)
     { 
-	  // int result = becomeDaemon ();
-	  int result = 0;
+	  syslog(LOG_DEBUG, "processing becomeDaemon()");
+
+	  int result = becomeDaemon ();
 	  syslog (LOG_INFO, "server: daemon monde\n");
 	  if (result == -1)
 	  {
@@ -116,34 +121,37 @@ main (int argc, char **argv)
         exit(-1);
 	  }
     }
-    
+  syslog(LOG_DEBUG, "processing listen()");
   if (listen (loop_sock, BACKLOG) == -1)
     {
       perror ("Server can't listen\n");
       exit (-1);
     }
 
+  syslog(LOG_DEBUG, "processing sigaction()");
+
   // register signal handler
 
-  //sa.sa_handler = signal_handler;
-  //sigemptyset (&sa.sa_mask);
-  //sa.sa_flags = SA_RESTART;
-  //if (sigaction (SIGINT, &sa, NULL) == -1)
-    //{
-      //perror ("sigaction");
-      //exit (1);
-    //}
-  //if (sigaction (SIGTERM, &sa, NULL) == -1)
-    //{
-      //perror ("sigaction");
-      //exit (1);
-    //}
+  sa.sa_handler = signal_handler;
+  sigemptyset (&sa.sa_mask);
+  sa.sa_flags = SA_RESTART;
+  if (sigaction (SIGINT, &sa, NULL) == -1)
+    {
+      perror ("sigaction");
+      exit (1);
+    }
+  if (sigaction (SIGTERM, &sa, NULL) == -1)
+    {
+      perror ("sigaction");
+      exit (1);
+    }
 
   syslog (LOG_INFO, "server: waiting for connections...\n");
 
   
   while (true)
     {
+	  syslog(LOG_DEBUG, "processing sigaction()");
       sin_size = sizeof client_addr;
       client_sock =
 	accept (loop_sock, (struct sockaddr *) &client_addr, &sin_size);
