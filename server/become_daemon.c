@@ -9,16 +9,22 @@ int				/* Returns 0 on success, -1 on error */
 becomeDaemon ()
 {
   int fd;
+  pid_t pid;
 
-  switch (fork ())
-    {
-    case -1:
-      return -1;
-    case 0:
-      break;
-    default:
-      _exit (EXIT_SUCCESS);
-    }
+  pid = fork();
+
+  if (pid < 0)
+  {
+	  syslog (LOG_ERR,"fork()");
+	  return -1;
+  }
+  
+  if (pid > 0) 
+  {
+	  syslog(LOG_INFO,"parent exiting...");
+	  exit(0);
+  }
+
   umask (0);
 
   if (setsid () == -1)
